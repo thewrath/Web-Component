@@ -8,6 +8,8 @@ I would increment this repository as I need it.
 
 # Usage
 
+## Basics
+
 The base class is the `Component` class, it inherits from `HTMLElement` and instantiates a `ShadowRoot` object which has as a child a template provided during construction.
 ```js
 import {Component} from "./Component";
@@ -57,8 +59,59 @@ export class ContactFormComponent extends FormComponent {
     }
 }
 ```
+ 
+N'oubliez de déclarer vos web component avec : 
+```js
+customElements.define('contact-form-component', ContactFormComponent);
+```
 
-More to come later ... 
+## Event handling
 
-## License
+But how do I manage the communication between my components?
+
+Like any other framework, using observer/observable:
+
+```js
+import {Component} from "./Component";
+
+export class MyEventSenderComponent extends Component {
+    constructor() {
+        // You don't have to pass a template under construction if you don't need it.
+        super('my-event-sender-component', null);
+    }
+
+    connectedCallback() {
+        // Ypu can directly access to input of your form
+        const coolButton = document.createElement('button');
+
+        // Observable can listen to 'catch-this-event'
+        coolButton.onclick = _ => this.dispatchEvent(new Event('catch-this-event'));
+        
+        this.appendChild(coolButton);
+    }
+}
+
+export class MyEventCatcherComponent extends Component {
+    constructor() {
+        // You don't have to pass a template under construction if you don't need it.
+        super('my-event-catcher-component', null);
+    }
+
+    connectedCallback() {
+        const myEventSenderComponent = new MyEventSenderComponent();
+        
+        // Listen for event from myEventSenderComponent 
+        myEventSenderComponent.addEventListener('catch-this-event', _ => {
+            console.log('I catch your event !');
+        })
+        
+        this.appendChild(myEventSenderComponent);
+    }
+}
+
+```
+And yes ... this is the event mechanism included in the HTML5 API of all browsers.
+Why would you want another one?
+
+# License
 [MIT](https://choosealicense.com/licenses/mit/)
